@@ -2,7 +2,7 @@ package com.bdwise.prometheus.client.converter;
 
 import java.util.List;
 
-public abstract class Result<T extends Data>{
+public abstract class Result<T>{
 	String status = null;
 	String resultType = null;
 	public String getStatus() {

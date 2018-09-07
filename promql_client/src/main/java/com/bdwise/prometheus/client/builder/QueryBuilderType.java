@@ -19,26 +19,55 @@ public enum QueryBuilderType {
 		}
 		
 	},
-	MetadaQuery{
+	SeriesMetadaQuery{
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public QueryBuilder newInstance(String prometheusUrl) {
-			// TODO Auto-generated method stub
-			return null;
+			return new SeriesMetaQueryBuilder(prometheusUrl);
 		}
 		
 	},
-	TargetQuery{
+	LabelMetadaQuery{
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public QueryBuilder newInstance(String prometheusUrl) {
-			// TODO Auto-generated method stub
-			return null;
+			return new LabelMetaQueryBuilder(prometheusUrl);
+		}
+		
+	},
+
+	TargetMetadaQuery{
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public QueryBuilder newInstance(String prometheusUrl) {
+			return new TargetMetaQueryBuilder(prometheusUrl);
+		}
+		
+	},
+
+	AlertManagerMetadaQuery{
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public QueryBuilder newInstance(String prometheusUrl) {
+			return new AlertManagerMetaQueryBuilder(prometheusUrl);
+		}
+		
+	},
+	
+	StatusMetadaQuery{
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public QueryBuilder newInstance(String prometheusUrl) {
+			return new StatusMetaQueryBuilder(prometheusUrl);
 		}
 		
 	};
+
 	
 	public abstract <T extends QueryBuilder> T newInstance(String prometheusUrl);
 }
