@@ -22,7 +22,7 @@ public class QueryResultItemValue {
 	}
 	@Override
 	public String toString() {
-		return "ResultDataItemValue [timestamp=" + timestamp + ", value=" + value + "]";
+		return "QueryResultItemValue [timestamp=" + timestamp + ", value=" + value + "]";
 	}
 
 }

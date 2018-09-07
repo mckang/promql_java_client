@@ -18,6 +18,11 @@ public class DefaultQueryResult<T extends Data> extends Result<T>{
 	public List<T> getResult() {
 		return result;
 	}
+
+	@Override
+	public String toString() {
+		return "DefaultQueryResult [result=" + result + "]";
+	}
 	
 	
 	

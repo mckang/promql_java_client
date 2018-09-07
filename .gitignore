@@ -1,2 +1,6 @@
 .classpath
 .project
+promql_client/.settings/
+promql_client/target
+promql_client_test/.settings/
+promql_client_test/target
