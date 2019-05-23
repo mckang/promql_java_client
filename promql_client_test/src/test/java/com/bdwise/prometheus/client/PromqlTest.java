@@ -2,6 +2,8 @@ package com.bdwise.prometheus.client;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -20,6 +22,7 @@ import com.bdwise.prometheus.client.converter.am.DefaultAlertManagerResult;
 import com.bdwise.prometheus.client.converter.label.DefaultLabelResult;
 import com.bdwise.prometheus.client.converter.query.DefaultQueryResult;
 import com.bdwise.prometheus.client.converter.query.MatrixData;
+import com.bdwise.prometheus.client.converter.query.QueryResultItemValue;
 import com.bdwise.prometheus.client.converter.query.VectorData;
 import com.bdwise.prometheus.client.converter.status.DefaultConfigResult;
 import com.bdwise.prometheus.client.converter.target.DefaultTargetResult;
@@ -27,7 +30,7 @@ import com.bdwise.prometheus.client.converter.target.DefaultTargetResult;
 import junit.framework.TestCase;
 
 public class PromqlTest extends TestCase {
-	private final static String TARGET_SERVER = "http://52.192.4.59:30900";
+	private final static String TARGET_SERVER = "http://192.168.66.60:9090";
 	
 	private RestTemplate template = null;
 	
@@ -45,9 +48,14 @@ public class PromqlTest extends TestCase {
 		template = new RestTemplate(httpRequestFactory);
 	}
 	
+	private static String ConvertEpocToFormattedDate(String format, double epocTime) {
+		SimpleDateFormat formatter = new SimpleDateFormat(format);
+		return formatter.format(new Date(Math.round(epocTime*1000)));
+	}
+	
 	public void testSimpleRangeQuery() throws MalformedURLException {
 		RangeQueryBuilder rangeQueryBuilder =  QueryBuilderType.RangeQuery.newInstance(TARGET_SERVER);
-		URI targetUri = rangeQueryBuilder.withQuery("irate(received_api_call_total[60s])")
+		URI targetUri = rangeQueryBuilder.withQuery("100 - avg(rate(node_cpu{application=\"node_exporter\", mode=\"idle\"}[1m])) by (instance)*100")
 		                 .withStartEpochTime(System.currentTimeMillis() / 1000 - 60*10)
 		                 .withEndEpochTime(System.currentTimeMillis() / 1000)
 		                 .withStepTime("60s")
@@ -62,13 +70,21 @@ public class PromqlTest extends TestCase {
 		
 		DefaultQueryResult<MatrixData> result = ConvertUtil.convertQueryResultString(rtVal);
 
+		for(MatrixData matrixData : result.getResult()) {
+			System.out.println(String.format("%s", matrixData.getMetric().get("instance")));
+			for(QueryResultItemValue itemValue : matrixData.getDataValues()) {
+				System.out.println(String.format("%s %10.2f ",
+						ConvertEpocToFormattedDate("yyyy-MM-dd hh:mm:ss", itemValue.getTimestamp()),
+						itemValue.getValue()
+						));
+			}
+		}
 		
-		System.out.println(result);	
 	}
 	
 	public void testSimpleInstantQuery() throws MalformedURLException {
 		InstantQueryBuilder iqb = QueryBuilderType.InstantQuery.newInstance(TARGET_SERVER);
-		URI targetUri = iqb.withQuery("irate(received_api_call_total[60s])").build();
+		URI targetUri = iqb.withQuery("100 - avg(rate(node_cpu{application=\"node_exporter\", mode=\"idle\"}[1m])) by (instance)*100").build();
 		System.out.println(targetUri.toURL().toString());
 		
 		
@@ -77,6 +93,13 @@ public class PromqlTest extends TestCase {
 
 		DefaultQueryResult<VectorData> result = ConvertUtil.convertQueryResultString(rtVal);
 
+		
+		for(VectorData vectorData : result.getResult()) {
+			System.out.println(String.format("%s %s %10.2f", 
+					vectorData.getMetric().get("instance"), 
+					vectorData.getFormattedTimestamps("yyyy-MM-dd hh:mm:ss"), 
+					vectorData.getValue() ));	
+		}
 		
 		System.out.println(result);		
 	}	
