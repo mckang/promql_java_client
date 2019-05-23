@@ -1,6 +1,8 @@
 package com.bdwise.prometheus.client.builder;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +24,11 @@ public class RangeQueryBuilder implements QueryBuilder {
 	}
 	
 	public RangeQueryBuilder withQuery(String query) {
-		params.put(QUERY_STRING, query);
+		try {
+			params.put(QUERY_STRING, URLEncoder.encode(query, "utf-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		return this;
 	}
 	
