@@ -82,6 +82,32 @@ public class PromqlTest extends TestCase {
 		
 	}
 	
+	public void testSimpleVectorQuery() throws MalformedURLException {
+		InstantQueryBuilder iqb = QueryBuilderType.InstantQuery.newInstance(TARGET_SERVER);
+		URI targetUri = iqb.withQuery("node_cpu{application=\"node_exporter\", mode=\"idle\"}[1m]").build();
+		
+		
+		
+		String rtVal = template.getForObject(targetUri, String.class);
+
+
+		DefaultQueryResult<MatrixData> result = ConvertUtil.convertQueryResultString(rtVal);
+
+		
+		for(MatrixData matrixData : result.getResult()) {
+			System.out.println(String.format("%s", matrixData.getMetric().get("instance")));
+			for(QueryResultItemValue itemValue : matrixData.getDataValues()) {
+				System.out.println(String.format("%s %10.2f ",
+						ConvertEpocToFormattedDate("yyyy-MM-dd hh:mm:ss", itemValue.getTimestamp()),
+						itemValue.getValue()
+						));
+			}
+		}
+		
+		System.out.println(targetUri.toURL().toString());
+//		System.out.println(result);		
+	}
+	
 	public void testSimpleInstantQuery() throws MalformedURLException {
 		InstantQueryBuilder iqb = QueryBuilderType.InstantQuery.newInstance(TARGET_SERVER);
 		URI targetUri = iqb.withQuery("100 - avg(rate(node_cpu{application=\"node_exporter\", mode=\"idle\"}[1m])) by (instance)*100").build();
